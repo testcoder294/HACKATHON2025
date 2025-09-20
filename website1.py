@@ -71,7 +71,12 @@ def index():
 @app.route('/food/<int:food_id>')
 def food_detail(food_id):
 	item = FoodItem.query.get_or_404(food_id)
-	return render_template('food_detail.html', item=item)
+	import json
+	try:
+		item_nutrition = json.loads(item.nutrition)
+	except Exception:
+		item_nutrition = {}
+	return render_template('food_detail.html', item=item, item_nutrition=item_nutrition)
 
 
 
