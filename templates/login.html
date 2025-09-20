@@ -18,7 +18,16 @@
 </head>
 <body>
         <div class="container">
-                {% with messages = get_flashed_messages() %}
+                {% with messages = get_flashed_messages(category_filter=['success']) %}
+                    {% if messages %}
+                        <ul style="color: green; font-weight: bold;">
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+                {% with messages = get_flashed_messages(category_filter=['error']) %}
                     {% if messages %}
                         <ul style="color: red; font-weight: bold;">
                         {% for message in messages %}

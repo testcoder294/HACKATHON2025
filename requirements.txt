@@ -1,2 +1,5 @@
-Flask>=3.0
+flask
+flask_sqlalchemy
+flask_login
 gunicorn
+werkzeug
