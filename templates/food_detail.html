@@ -109,6 +109,11 @@
     <div class="container">
         <h2>{{ item.name }}</h2>
         <img src="{{ url_for('static', filename='images/' + item.image) }}" alt="{{ item.name }}">
+        {% if current_user.is_authenticated and current_user.is_admin %}
+        <div style="text-align:right; margin-bottom:10px;">
+            <a href="{{ url_for('edit_food', food_id=item.id) }}" style="color:#fff; background:#00bfae; padding:7px 18px; border-radius:8px; text-decoration:none; font-weight:600;">Edit</a>
+        </div>
+        {% endif %}
         <div style="font-size:1.15em; color:#00bfae; font-weight:600; margin-bottom:8px;">₹{{ '%.2f'|format(item.price) }}</div>
     <span style="display:inline-block; padding:3px 14px; border-radius:14px; font-size:1em; font-weight:700; background:{{ '#b2ffb2' if item.is_healthy else '#ffd6d6' }}; color:{{ '#008c5f' if item.is_healthy else '#b85c00' }}; margin-bottom:16px;">{{ 'Healthy' if item.is_healthy else 'Junk' }}</span>
         <h3>Nutritional Information</h3>

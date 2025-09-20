@@ -48,6 +48,28 @@ class FoodLog(db.Model):
 	date = db.Column(db.Date, nullable=False)
 	is_healthy = db.Column(db.Boolean, nullable=False)
 
+# === Admin Edit Food Route ===
+@app.route('/edit_food/<int:food_id>', methods=['GET', 'POST'])
+@login_required
+def edit_food(food_id):
+	if not current_user.is_admin:
+		return 'Forbidden: Admins only', 403
+	item = FoodItem.query.get_or_404(food_id)
+	import json
+	if request.method == 'POST':
+		item.name = request.form['name']
+		item.image = request.form['image']
+		item.price = float(request.form['price'])
+		try:
+			item.nutrition = request.form['nutrition']
+		except Exception:
+			pass
+		item.is_healthy = 'is_healthy' in request.form
+		db.session.commit()
+		flash('Food item updated!', 'success')
+		return redirect(url_for('food_detail', food_id=item.id))
+	return render_template('edit_food.html', item=item)
+
 # === User loader ===
 @login_manager.user_loader
 def load_user(user_id):
