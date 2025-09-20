@@ -1,139 +1,118 @@
+{% include 'navbar.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Canteen Food Items</title>
+    <title>Canteen Menu</title>
     <style>
         body {
+            font-family: 'Poppins', Arial, sans-serif;
+            background: #f0fafa;
             margin: 0;
             padding: 0;
-            font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #e0f7fa 0%, #fff7f0 100%);
-            color: #222;
         }
-        header {
-            background: linear-gradient(90deg, #00bfae 60%, #ff9800 100%);
-            color: #fff;
-            padding: 44px 0 28px 0;
+        h1 {
             text-align: center;
-            box-shadow: 0 2px 16px rgba(0,191,174,0.10);
-            border-bottom-left-radius: 36px;
-            border-bottom-right-radius: 36px;
+            margin: 20px 0;
+            color: #00bfae;
         }
-        header h1 {
-            margin: 0;
-            font-size: 2.8em;
-            letter-spacing: 2px;
-            font-weight: 800;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        header p {
-            font-size:1.15em;
-            font-weight:400;
-            margin-top:12px;
-            color:#e0f7fa;
-        }
-        .food-list {
+        .cards {
             display: flex;
             flex-wrap: wrap;
-            gap: 44px;
             justify-content: center;
-            margin: 48px auto 0 auto;
-            max-width: 1300px;
+            gap: 20px;
+            padding: 20px;
         }
-        .food-item {
-            background: linear-gradient(135deg, #fff 60%, #e0f7fa 100%);
-            border-radius: 22px;
-            box-shadow: 0 6px 32px rgba(0,191,174,0.10);
-            border: none;
-            padding: 28px 20px 20px 20px;
-            width: 260px;
-            text-align: center;
-            transition: box-shadow 0.25s, transform 0.22s;
-            position: relative;
-            overflow: hidden;
-            animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
-        }
-        .food-item:hover {
-            box-shadow: 0 12px 40px rgba(255,152,0,0.18);
-            transform: translateY(-8px) scale(1.045);
-        }
-        .food-item img {
-            width: 180px;
-            height: 135px;
-            object-fit: cover;
-            border-radius: 14px;
-            border: 3px solid #00bfae;
+        .card {
             background: #fff;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 12px rgba(0,191,174,0.07);
-        }
-        .food-item a {
-            text-decoration: none;
-            color: #00bfae;
-            font-weight: 700;
-            font-size: 1.18em;
-            display: block;
-            margin-top: 10px;
-            padding: 7px 0;
-            border-radius: 7px;
-            transition: background 0.2s, color 0.2s;
-        }
-        .food-item a:hover {
-            color: #fff;
-            background: #ff9800;
-        }
-        footer {
-            margin-top: 60px;
-            background: linear-gradient(90deg, #00bfae 60%, #ff9800 100%);
-            color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            width: 250px;
+            padding: 16px;
             text-align: center;
-            padding: 18px 0 12px 0;
-            border-top-left-radius: 36px;
-            border-top-right-radius: 36px;
-            font-size: 1.08em;
-            letter-spacing: 1px;
+            transition: transform 0.2s;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: none; }
+        .card:hover {
+            transform: translateY(-4px);
         }
-        @media (max-width: 700px) {
-            .food-list { gap: 18px; }
-            .food-item { width: 95vw; max-width: 320px; }
-            .food-item img { width: 90vw; max-width: 200px; height: 110px; }
+        .card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        .card h3 {
+            margin: 12px 0 4px;
+            color: #333;
+        }
+        .price {
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .nutrition {
+            font-size: 0.9em;
+            color: #444;
+            text-align: left;
+            margin: 8px 0;
+        }
+        .btn {
+            display: inline-block;
+            margin: 6px 4px;
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-details {
+            background: #00bfae;
+            color: #fff;
+        }
+        .btn-details:hover {
+            background: #009688;
+        }
+        .btn-log {
+            background: #ff9800;
+            color: #fff;
+        }
+        .btn-log:hover {
+            background: #e68900;
+        }
+        .btn-edit {
+            background: #2196f3;
+            color: #fff;
+        }
+        .btn-edit:hover {
+            background: #1976d2;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Canteen Food Items</h1>
-        <p>Discover delicious food and their nutrition facts!</p>
-        <div style="margin-top:18px;">
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('add_food') }}" style="display:inline-block; margin-right:12px; padding:12px 28px; background:linear-gradient(90deg,#00bfae 60%,#ff9800 100%); color:#fff; font-weight:700; border-radius:12px; font-size:1.15em; text-decoration:none; box-shadow:0 2px 8px #00bfae33; transition:background 0.2s;">+ Add Food Item</a>
-            <a href="{{ url_for('dashboard') }}" style="display:inline-block; margin-right:12px; padding:12px 28px; background:#fff; color:#00bfae; font-weight:700; border-radius:12px; font-size:1.15em; text-decoration:none; box-shadow:0 2px 8px #00bfae33; border:2px solid #00bfae; transition:background 0.2s;">Dashboard</a>
-            <a href="{{ url_for('logout') }}" style="display:inline-block; padding:12px 28px; background:#ff9800; color:#fff; font-weight:700; border-radius:12px; font-size:1.15em; text-decoration:none; box-shadow:0 2px 8px #ff980033; transition:background 0.2s;">Logout</a>
-        {% else %}
-            <a href="{{ url_for('login') }}" style="display:inline-block; margin-right:12px; padding:12px 28px; background:#00bfae; color:#fff; font-weight:700; border-radius:12px; font-size:1.15em; text-decoration:none; box-shadow:0 2px 8px #00bfae33; transition:background 0.2s;">Login</a>
-            <a href="{{ url_for('register') }}" style="display:inline-block; padding:12px 28px; background:#ff9800; color:#fff; font-weight:700; border-radius:12px; font-size:1.15em; text-decoration:none; box-shadow:0 2px 8px #ff980033; transition:background 0.2s;">Register</a>
-        {% endif %}
-        </div>
-    </header>
-    <div class="food-list">
+    <h1>Canteen Menu</h1>
+    <div class="cards">
         {% for item in food_items %}
-        <div class="food-item">
-            <a href="{{ url_for('food_detail', food_id=item.id) }}">
-                <img src="{{ url_for('static', filename='images/' + item.image) }}" alt="{{ item.name }}">
-                <div style="font-size:1.15em; font-weight:700; margin-bottom:4px;">{{ item.name }}</div>
-                <div style="font-size:1.05em; color:#00bfae; margin-bottom:4px;">₹{{ '%.2f'|format(item.price) }}</div>
-                <span style="display:inline-block; padding:2px 10px; border-radius:12px; font-size:0.95em; font-weight:600; background:{{ '#b2ffb2' if item.is_healthy else '#ffd6d6' }}; color:{{ '#008c5f' if item.is_healthy else '#b85c00' }}; margin-bottom:6px;">{{ 'Healthy' if item.is_healthy else 'Junk' }}</span>
-            </a>
+        <div class="card">
+            <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}">
+            <h3>{{ item.name }}</h3>
+            <p class="price">₹{{ "%.2f"|format(item.price) }}</p>
+
+            <div class="nutrition">
+                <p><strong>Calories:</strong> {{ item.nutrition.get("Calories", "-") }}</p>
+                <p><strong>Protein:</strong> {{ item.nutrition.get("Protein", "-") }}</p>
+                <p><strong>Fat:</strong> {{ item.nutrition.get("Fat", "-") }}</p>
+                <p><strong>Carbs:</strong> {{ item.nutrition.get("Carbs", "-") }}</p>
+            </div>
+
+            <a href="{{ url_for('food_detail', food_id=item.id) }}" class="btn btn-details">Details</a>
+            <form action="{{ url_for('log_food', food_id=item.id) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-log">Log Food</button>
+            </form>
+
+            {% if current_user.is_authenticated and current_user.is_admin %}
+                <a href="{{ url_for('edit_food', food_id=item.id) }}" class="btn btn-edit">Edit</a>
+            {% endif %}
         </div>
         {% endfor %}
     </div>
-    <footer>
-    &copy; {{ 2025 }} Canteen Food Explorer &mdash; Designed with ❤️ by Team Binary Bruteforce
-    </footer>
 </body>
 </html>

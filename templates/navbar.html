@@ -1,0 +1,13 @@
+<nav style="background:#00bfae; padding:12px; text-align:right;">
+    {% if current_user.is_authenticated %}
+        <span style="margin-right:20px;">Hello, {{ current_user.username }}</span>
+        <a href="{{ url_for('dashboard') }}" style="margin-right:15px; color:white; text-decoration:none;">Dashboard</a>
+        {% if current_user.is_admin %}
+            <a href="{{ url_for('add_food') }}" style="margin-right:15px; color:white; text-decoration:none;">Add Food</a>
+        {% endif %}
+        <a href="{{ url_for('logout') }}" style="color:white; text-decoration:none;">Logout</a>
+    {% else %}
+        <a href="{{ url_for('login') }}" style="margin-right:15px; color:white; text-decoration:none;">Login</a>
+        <a href="{{ url_for('register') }}" style="color:white; text-decoration:none;">Register</a>
+    {% endif %}
+</nav>

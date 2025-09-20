@@ -1,3 +1,4 @@
+{% include 'navbar.html' %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,11 +18,13 @@
 <body>
     <div class="container">
         <h2>Add Food Item</h2>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             <label>Name</label>
             <input type="text" name="name" required>
-            <label>Image Filename (in static/images/)</label>
-            <input type="text" name="image" required>
+
+            <label>Image</label>
+            <input type="file" name="image" accept="image/*" required>
+
             <label>Calories</label>
             <input type="text" name="calories" required>
             <label>Protein</label>
