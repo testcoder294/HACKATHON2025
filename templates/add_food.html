@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Food Item</title>
+    <style>
+        body { font-family: 'Poppins', Arial, sans-serif; background: #e0f7fa; }
+        .container { max-width: 500px; margin: 40px auto; background: #fff; border-radius: 18px; box-shadow: 0 4px 24px #00bfae22; padding: 36px; }
+        h2 { color: #00bfae; text-align: center; }
+        form { display: flex; flex-direction: column; gap: 16px; }
+        input, select { padding: 10px; border-radius: 6px; border: 1px solid #b2dfdb; font-size: 1em; }
+        label { font-weight: 600; color: #00bfae; }
+        button { background: #00bfae; color: #fff; border: none; border-radius: 6px; padding: 12px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #ff9800; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Add Food Item</h2>
+        <form method="POST">
+            <label>Name</label>
+            <input type="text" name="name" required>
+            <label>Image Filename (in static/images/)</label>
+            <input type="text" name="image" required>
+            <label>Calories</label>
+            <input type="text" name="calories" required>
+            <label>Protein</label>
+            <input type="text" name="protein" required>
+            <label>Fat</label>
+            <input type="text" name="fat" required>
+            <label>Carbs</label>
+            <input type="text" name="carbs" required>
+            <label>Price (₹)</label>
+            <input type="number" name="price" step="0.01" required>
+            <label><input type="checkbox" name="is_healthy" checked> Healthy</label>
+            <button type="submit">Add Food</button>
+        </form>
+    </div>
+</body>
+</html>
