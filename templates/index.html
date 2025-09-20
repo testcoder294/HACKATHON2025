@@ -5,66 +5,111 @@
     <title>Canteen Food Items</title>
     <style>
         body {
-            background: #fff;
-            color: #ff6600;
-            font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             padding: 0;
+            font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #e0f7fa 0%, #fff7f0 100%);
+            color: #222;
         }
-        h1 {
-            background: #ff6600;
+        header {
+            background: linear-gradient(90deg, #00bfae 60%, #ff9800 100%);
             color: #fff;
-            margin: 0 0 32px 0;
-            padding: 24px 0;
+            padding: 44px 0 28px 0;
             text-align: center;
+            box-shadow: 0 2px 16px rgba(0,191,174,0.10);
+            border-bottom-left-radius: 36px;
+            border-bottom-right-radius: 36px;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.8em;
             letter-spacing: 2px;
+            font-weight: 800;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        header p {
+            font-size:1.15em;
+            font-weight:400;
+            margin-top:12px;
+            color:#e0f7fa;
         }
         .food-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 32px;
+            gap: 44px;
             justify-content: center;
+            margin: 48px auto 0 auto;
+            max-width: 1300px;
         }
         .food-item {
-            border: 2px solid #ff6600;
-            border-radius: 12px;
-            padding: 18px 12px;
-            width: 210px;
+            background: linear-gradient(135deg, #fff 60%, #e0f7fa 100%);
+            border-radius: 22px;
+            box-shadow: 0 6px 32px rgba(0,191,174,0.10);
+            border: none;
+            padding: 28px 20px 20px 20px;
+            width: 260px;
             text-align: center;
-            background: #fff;
-            box-shadow: 0 2px 8px rgba(255,102,0,0.07);
-            transition: box-shadow 0.2s, transform 0.2s;
+            transition: box-shadow 0.25s, transform 0.22s;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
         }
         .food-item:hover {
-            box-shadow: 0 4px 16px rgba(255,102,0,0.18);
-            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 12px 40px rgba(255,152,0,0.18);
+            transform: translateY(-8px) scale(1.045);
         }
         .food-item img {
-            width: 150px;
-            height: 120px;
+            width: 180px;
+            height: 135px;
             object-fit: cover;
-            border-radius: 8px;
-            border: 2px solid #ff6600;
+            border-radius: 14px;
+            border: 3px solid #00bfae;
             background: #fff;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 12px rgba(0,191,174,0.07);
         }
         .food-item a {
             text-decoration: none;
-            color: #ff6600;
-            font-weight: bold;
-            font-size: 1.1em;
+            color: #00bfae;
+            font-weight: 700;
+            font-size: 1.18em;
             display: block;
             margin-top: 10px;
+            padding: 7px 0;
+            border-radius: 7px;
+            transition: background 0.2s, color 0.2s;
         }
         .food-item a:hover {
             color: #fff;
-            background: #ff6600;
-            border-radius: 6px;
-            padding: 2px 6px;
+            background: #ff9800;
+        }
+        footer {
+            margin-top: 60px;
+            background: linear-gradient(90deg, #00bfae 60%, #ff9800 100%);
+            color: #fff;
+            text-align: center;
+            padding: 18px 0 12px 0;
+            border-top-left-radius: 36px;
+            border-top-right-radius: 36px;
+            font-size: 1.08em;
+            letter-spacing: 1px;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: none; }
+        }
+        @media (max-width: 700px) {
+            .food-list { gap: 18px; }
+            .food-item { width: 95vw; max-width: 320px; }
+            .food-item img { width: 90vw; max-width: 200px; height: 110px; }
         }
     </style>
 </head>
 <body>
-    <h1>Canteen Food Items</h1>
+    <header>
+        <h1>Canteen Food Items</h1>
+        <p>Discover delicious food and their nutrition facts!</p>
+    </header>
     <div class="food-list">
         {% for item in food_items %}
         <div class="food-item">
@@ -75,5 +120,8 @@
         </div>
         {% endfor %}
     </div>
+    <footer>
+    &copy; {{ 2025 }} Canteen Food Explorer &mdash; Designed with ❤️ by Team Binary Bruteforce
+    </footer>
 </body>
 </html>
