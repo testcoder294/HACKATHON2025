@@ -1,20 +1,23 @@
-from werkzeug.utils import secure_filename
+# website1.py
 import os
 import json
-from flask import Flask, render_template, url_for, abort, request, redirect, flash, session
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date
+from flask import Flask, render_template, url_for, request, redirect, flash
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import (
+    UserMixin, LoginManager, login_user, login_required,
+    logout_user, current_user
+)
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
-# === App setup ===
+# === App Setup ===
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key_here'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///canteen.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Image upload folder
-UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -25,7 +28,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 
-# Make current_user available in templates
+# === Context processor ===
 @app.context_processor
 def inject_user():
     return dict(current_user=current_user)
@@ -37,16 +40,17 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
-    logs = db.relationship('FoodLog', backref='user', lazy=True)
     is_admin = db.Column(db.Boolean, default=False)
+    logs = db.relationship('FoodLog', backref='user', lazy=True)
 
 
 class FoodItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    image = db.Column(db.String(100), nullable=False)
-    nutrition = db.Column(db.Text, nullable=False)  # Store JSON string
+    image = db.Column(db.String(200), nullable=False)
+    nutrition = db.Column(db.Text, nullable=False)  # JSON string
     price = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text, nullable=True)  # NEW FIELD
     is_healthy = db.Column(db.Boolean, default=True)
     logs = db.relationship('FoodLog', backref='food', lazy=True)
 
@@ -66,26 +70,27 @@ def load_user(user_id):
 
 
 # === Routes ===
+
 @app.route('/')
 def index():
-    food_items = FoodItem.query.all()
-    # Decode nutrition for each food item
-    food_with_nutrition = []
-    for item in food_items:
+    # Return list of dicts with decoded nutrition to avoid template .get errors
+    items = FoodItem.query.all()
+    prepared = []
+    for it in items:
         try:
-            nutrition = json.loads(item.nutrition)
-        except:
+            nutrition = json.loads(it.nutrition)
+        except Exception:
             nutrition = {}
-        food_with_nutrition.append({
-            'id': item.id,
-            'name': item.name,
-            'image': item.image,
-            'price': item.price,
-            'is_healthy': item.is_healthy,
-            'nutrition': nutrition
+        prepared.append({
+            "id": it.id,
+            "name": it.name,
+            "image": it.image,
+            "price": it.price,
+            "description": it.description,
+            "is_healthy": it.is_healthy,
+            "nutrition": nutrition
         })
-    return render_template('index.html', food_items=food_with_nutrition)
-
+    return render_template('index.html', food_items=prepared)
 
 
 @app.route('/food/<int:food_id>')
@@ -94,8 +99,8 @@ def food_detail(food_id):
     nutrition = {}
     try:
         nutrition = json.loads(item.nutrition)
-    except:
-        pass
+    except Exception:
+        nutrition = {}
     return render_template('food_detail.html', item=item, nutrition=nutrition)
 
 
@@ -106,45 +111,149 @@ def dashboard():
     total_calories = 0
     healthy_count = 0
     junk_count = 0
+    total_spent = 0.0
     for log in logs:
         food = FoodItem.query.get(log.food_id)
-        nutrition = json.loads(food.nutrition)
-        cal = nutrition.get('Calories', '0').split()[0]
         try:
+            nutrition = json.loads(food.nutrition)
+            cal = nutrition.get('Calories', '0').split()[0]
             total_calories += int(cal)
-        except:
+        except Exception:
             pass
+        if food:
+            total_spent += float(food.price or 0)
         if log.is_healthy:
             healthy_count += 1
         else:
             junk_count += 1
-    return render_template('dashboard.html',
-                           logs=logs,
-                           total_calories=total_calories,
-                           healthy_count=healthy_count,
-                           junk_count=junk_count)
+    return render_template(
+        'dashboard.html',
+        logs=logs,
+        total_calories=total_calories,
+        healthy_count=healthy_count,
+        junk_count=junk_count,
+        total_spent=total_spent
+    )
 
 
 @app.route('/log_food/<int:food_id>', methods=['POST'])
 @login_required
 def log_food(food_id):
     food = FoodItem.query.get_or_404(food_id)
-    log = FoodLog(user_id=current_user.id,
-                  food_id=food.id,
-                  date=date.today(),
-                  is_healthy=food.is_healthy)
+    log = FoodLog(user_id=current_user.id, food_id=food.id, date=date.today(), is_healthy=food.is_healthy)
     db.session.add(log)
     db.session.commit()
-    flash(f'Logged {food.name} as consumed!')
+    flash(f'Logged {food.name} as consumed!', 'success')
     return redirect('/dashboard')
 
 
-# === Auth Routes ===
+@app.route('/add_food', methods=['GET', 'POST'])
+@login_required
+def add_food():
+    if not current_user.is_admin:
+        return 'Forbidden: Admins only', 403
+
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        description = request.form.get('description', '').strip()
+
+        # Image handling
+        file = request.files.get('image')
+        if file and file.filename:
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            image_path = f'uploads/{filename}'
+        else:
+            # allow manual filename but always prefix uploads/
+            manual = request.form.get('image', '').strip()
+            image_path = f'uploads/{manual}' if manual else ''
+
+        nutrition = {
+            'Calories': request.form.get('calories', '').strip(),
+            'Protein': request.form.get('protein', '').strip(),
+            'Fat': request.form.get('fat', '').strip(),
+            'Carbs': request.form.get('carbs', '').strip()
+        }
+        try:
+            price = float(request.form.get('price', 0))
+        except ValueError:
+            price = 0.0
+        is_healthy = request.form.get('is_healthy') == 'on'
+
+        food = FoodItem(
+            name=name,
+            image=image_path,
+            nutrition=json.dumps(nutrition),
+            price=price,
+            description=description,
+            is_healthy=is_healthy
+        )
+        db.session.add(food)
+        db.session.commit()
+        flash('Food item added!', 'success')
+        return redirect('/')
+
+    return render_template('add_food.html')
+
+
+@app.route('/edit_food/<int:food_id>', methods=['GET', 'POST'])
+@login_required
+def edit_food(food_id):
+    if not current_user.is_admin:
+        return 'Forbidden: Admins only', 403
+
+    item = FoodItem.query.get_or_404(food_id)
+
+    if request.method == 'POST':
+        item.name = request.form.get('name', item.name).strip()
+        try:
+            item.price = float(request.form.get('price', item.price))
+        except ValueError:
+            pass
+        item.description = request.form.get('description', item.description)
+        item.is_healthy = 'is_healthy' in request.form
+
+        # Nutrition: accept JSON string from form; ensure it's stored as string
+        posted_nut = request.form.get('nutrition', None)
+        if posted_nut is not None:
+            # If admin entered JSON text, try to validate
+            try:
+                parsed = json.loads(posted_nut)
+                item.nutrition = json.dumps(parsed)
+            except Exception:
+                # if invalid JSON, keep as raw string (not ideal) — but prefer validated
+                item.nutrition = posted_nut
+
+        # Image upload
+        image_file = request.files.get('image_file')
+        if image_file and image_file.filename:
+            filename = secure_filename(image_file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            image_file.save(filepath)
+            item.image = f'uploads/{filename}'
+        else:
+            manual = request.form.get('image', '').strip()
+            if manual:
+                item.image = f'uploads/{manual}'
+
+        db.session.commit()
+        flash('Food item updated!', 'success')
+        return redirect(url_for('food_detail', food_id=item.id))
+
+    # prepare nutrition text for textarea (stringified JSON for editing)
+    try:
+        nutrition_text = json.dumps(json.loads(item.nutrition), indent=2)
+    except Exception:
+        nutrition_text = item.nutrition
+    return render_template('edit_food.html', item=item, nutrition_text=nutrition_text)
+
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
@@ -156,115 +265,30 @@ def login():
     return render_template('login.html')
 
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
+        if User.query.filter_by(username=username).first() or User.query.filter_by(email=email).first():
+            flash('Username or email already exists!', 'error')
+            return redirect('/register')
+        hashed_pw = generate_password_hash(password)
+        user = User(username=username, email=email, password_hash=hashed_pw)
+        db.session.add(user)
+        db.session.commit()
+        flash('Registration successful! Please log in.', 'success')
+        return redirect('/login')
+    return render_template('register.html')
+
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     flash('Logged out successfully!', 'success')
     return redirect('/')
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
-        if User.query.filter_by(username=username).first() or User.query.filter_by(email=email).first():
-            flash('Username or email already exists!')
-            return redirect('/register')
-        hashed_pw = generate_password_hash(password)
-        user = User(username=username, email=email, password_hash=hashed_pw)
-        db.session.add(user)
-        db.session.commit()
-        flash('Registration successful! Please log in.')
-        return redirect('/login')
-    return render_template('register.html')
-
-
-# === Admin: Add Food ===
-@app.route('/add_food', methods=['GET', 'POST'])
-@login_required
-def add_food():
-    if not current_user.is_admin:
-        return 'Forbidden: Admins only', 403
-
-    if request.method == 'POST':
-        name = request.form['name']
-
-        # Handle uploaded image
-        file = request.files['image']
-        if file:
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-            image_path = f'uploads/{filename}'
-        else:
-            image_path = ''
-
-        nutrition = {
-            'Calories': request.form.get('calories', ''),
-            'Protein': request.form.get('protein', ''),
-            'Fat': request.form.get('fat', ''),
-            'Carbs': request.form.get('carbs', '')
-        }
-        price = float(request.form['price'])
-        is_healthy = request.form.get('is_healthy') == 'on'
-
-        food = FoodItem(
-            name=name,
-            image=image_path,
-            nutrition=json.dumps(nutrition),
-            price=price,
-            is_healthy=is_healthy
-        )
-        db.session.add(food)
-        db.session.commit()
-        flash('Food item added!')
-        return redirect('/')
-    return render_template('add_food.html')
-
-
-# === Admin: Edit Food ===
-@app.route('/edit_food/<int:food_id>', methods=['GET', 'POST'])
-@login_required
-def edit_food(food_id):
-    if not current_user.is_admin:
-        return 'Forbidden: Admins only', 403
-
-    item = FoodItem.query.get_or_404(food_id)
-
-    if request.method == 'POST':
-        item.name = request.form['name']
-
-        # Handle image upload
-        image = request.form.get('image', '')
-        image_file = request.files.get('image_file')
-        if image_file and image_file.filename:
-            filename = secure_filename(image_file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            image_file.save(filepath)
-            image = f'uploads/{filename}'
-        item.image = image
-
-        # Price
-        item.price = float(request.form['price'])
-
-        # Nutrition (store as JSON string always)
-        try:
-            nutrition_dict = json.loads(request.form['nutrition'])
-            item.nutrition = json.dumps(nutrition_dict)
-        except:
-            item.nutrition = request.form['nutrition']
-
-        # Healthy toggle
-        item.is_healthy = 'is_healthy' in request.form
-
-        db.session.commit()
-        flash('Food item updated!', 'success')
-        return redirect(url_for('food_detail', food_id=item.id))
-
-    return render_template('edit_food.html', item=item)
 
 
 if __name__ == '__main__':

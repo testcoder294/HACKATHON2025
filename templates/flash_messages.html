@@ -1,0 +1,17 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-container">
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<style>
+.flash-container { max-width: 800px; margin: 12px auto; text-align: center; }
+.flash { padding: 10px 14px; margin-bottom: 10px; border-radius: 6px; font-weight: bold; }
+.flash.success { background: #dff0d8; color: #2f6f3a; border: 1px solid #c9e6c9; }
+.flash.error   { background: #f8d7da; color: #7a1b1b; border: 1px solid #f1c2c8; }
+.flash.warning { background: #fff3cd; color: #776600; border: 1px solid #ffeeba; }
+</style>

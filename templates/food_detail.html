@@ -1,100 +1,49 @@
 {% include 'navbar.html' %}
+{% include 'flash_messages.html' %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <title>{{ item.name }}</title>
     <style>
-        body {
-            font-family: 'Poppins', Arial, sans-serif;
-            background: #f1fafa;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 700px;
-            margin: 60px auto;
-            background: #fff;
-            border-radius: 16px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
-            padding: 32px;
-            text-align: center;
-        }
-        img {
-            max-width: 200px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-        h2 {
-            color: #00bfae;
-            margin: 10px 0;
-        }
-        p {
-            font-size: 1.1em;
-            margin: 6px 0;
-        }
-        .nutrition {
-            margin-top: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 12px;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th {
-            background: #00bfae;
-            color: #fff;
-            padding: 10px;
-        }
-        td {
-            padding: 10px;
-        }
-        button {
-            margin-top: 20px;
-            background: #ff9800;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 12px 18px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        button:hover {
-            background: #e68a00;
-        }
+        body { font-family: Arial, sans-serif; background:#f1fafa; margin:0; padding:0; }
+        .container { max-width:800px; margin:40px auto; background:#fff; padding:28px; border-radius:12px; box-shadow:0 6px 24px rgba(0,0,0,0.08); text-align:center; }
+        img { max-width:220px; border-radius:8px; }
+        table { width:80%; margin:16px auto; border-collapse:collapse; }
+        th { background:#00bfae; color:#fff; padding:10px; } td { padding:10px; border:1px solid #eee; }
+        .desc { text-align:left; max-width:700px; margin:12px auto; color:#333; }
+        .btn-log { background:#ff9800; color:#fff; padding:10px 16px; border-radius:8px; border:none; font-weight:bold; cursor:pointer; }
+        .btn-edit { background:#1976d2; color:#fff; padding:8px 12px; border-radius:8px; text-decoration:none; font-weight:bold; }
     </style>
 </head>
 <body>
     <div class="container">
         <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}">
-        <h2>{{ item.name }}</h2>
+        <h2 style="color:#00bfae">{{ item.name }}</h2>
         <p><strong>Price:</strong> ₹{{ "%.2f"|format(item.price) }}</p>
 
-        <div class="nutrition">
-            <h3>Nutrition</h3>
-            <table>
-                <tr>
-                    <th>Calories</th>
-                    <th>Protein</th>
-                    <th>Fat</th>
-                    <th>Carbs</th>
-                </tr>
-                <tr>
-                    <td>{{ nutrition.get("Calories", "-") }}</td>
-                    <td>{{ nutrition.get("Protein", "-") }}</td>
-                    <td>{{ nutrition.get("Fat", "-") }}</td>
-                    <td>{{ nutrition.get("Carbs", "-") }}</td>
-                </tr>
-            </table>
+        <div class="desc">
+            <h4>Description</h4>
+            <p>{{ item.description or 'No description provided.' }}</p>
         </div>
 
+        <h4>Nutrition</h4>
+        <table>
+            <tr><th>Calories</th><th>Protein</th><th>Fat</th><th>Carbs</th></tr>
+            <tr>
+                <td>{{ nutrition.get('Calories', '-') }}</td>
+                <td>{{ nutrition.get('Protein', '-') }}</td>
+                <td>{{ nutrition.get('Fat', '-') }}</td>
+                <td>{{ nutrition.get('Carbs', '-') }}</td>
+            </tr>
+        </table>
+
+        {% if current_user.is_authenticated and current_user.is_admin %}
+            <a href="{{ url_for('edit_food', food_id=item.id) }}" class="btn-edit">Edit Item</a>
+        {% endif %}
+
         <form method="POST" action="{{ url_for('log_food', food_id=item.id) }}">
-            <button type="submit">Log Food</button>
+            <button class="btn-log" type="submit">Log Food</button>
         </form>
     </div>
 </body>

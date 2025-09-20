@@ -1,6 +1,7 @@
 <nav style="background:#00bfae; padding:12px; text-align:right;">
+    <a href="{{ url_for('index') }}" style="margin-right:15px; color:white; text-decoration:none;">Home</a>
     {% if current_user.is_authenticated %}
-        <span style="margin-right:20px;">Hello, {{ current_user.username }}</span>
+        <span style="margin-right:20px; color:white;">Hello, {{ current_user.username }}</span>
         <a href="{{ url_for('dashboard') }}" style="margin-right:15px; color:white; text-decoration:none;">Dashboard</a>
         {% if current_user.is_admin %}
             <a href="{{ url_for('add_food') }}" style="margin-right:15px; color:white; text-decoration:none;">Add Food</a>

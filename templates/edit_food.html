@@ -1,45 +1,48 @@
 {% include 'navbar.html' %}
+{% include 'flash_messages.html' %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Edit Food Item</title>
+    <meta charset="utf-8">
+    <title>Edit Food</title>
     <style>
-        body { font-family: 'Poppins', Arial, sans-serif; background: #e0f7fa; }
-        .container { max-width: 420px; margin: 60px auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px #00bfae22; padding: 32px; }
-        h2 { color: #00bfae; text-align: center; }
-        form { display: flex; flex-direction: column; gap: 18px; }
-        input, textarea { padding: 10px; border-radius: 6px; border: 1px solid #b2dfdb; font-size: 1em; }
-        button { background: #00bfae; color: #fff; border: none; border-radius: 6px; padding: 12px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-        button:hover { background: #ff9800; }
-        .link { text-align: center; margin-top: 12px; }
-        .link a { color: #00bfae; text-decoration: none; }
-        .link a:hover { text-decoration: underline; }
+        body { font-family: Arial, sans-serif; background:#f0fafa; }
+        .form-box { max-width:520px; margin:30px auto; background:#fff; padding:22px; border-radius:10px; box-shadow:0 6px 18px rgba(0,0,0,0.06); }
+        label { display:block; margin-top:12px; color:#333; }
+        input, textarea { width:100%; padding:10px; margin-top:6px; border-radius:6px; border:1px solid #ddd; }
+        button { margin-top:14px; padding:10px 16px; background:#1976d2; color:#fff; border:none; border-radius:8px; font-weight:bold; cursor:pointer; }
+        .current-img { margin-top:8px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Edit Food Item</h2>
+    <div class="form-box">
+        <h2>Edit: {{ item.name }}</h2>
         <form method="POST" enctype="multipart/form-data">
-            <input type="text" name="name" placeholder="Name" value="{{ item.name }}" required>
+            <label>Name</label>
+            <input type="text" name="name" value="{{ item.name }}" required>
 
-            <p>Current Image:</p>
-            <img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}" width="120">
+            <label>Current image</label>
+            <div class="current-img"><img src="{{ url_for('static', filename=item.image) }}" alt="{{ item.name }}" width="140"></div>
 
-            <label>Image File (upload or enter filename manually):</label>
+            <label>New Image (upload)</label>
             <input type="file" name="image_file" accept="image/*">
-            <small>Or enter filename manually: <input type="text" name="image" value="{{ item.image }}"></small>
 
-            <input type="number" step="0.01" name="price" placeholder="Price" value="{{ item.price }}" required>
+            <label>Or manual filename (uploads/ will be prefixed)</label>
+            <input type="text" name="image" value="{{ item.image.split('/')[-1] if item.image else '' }}">
 
-            <label>Nutrition (JSON):</label>
-            <textarea name="nutrition" rows="4" required>{{ item.nutrition }}</textarea>
+            <label>Price</label>
+            <input type="number" step="0.01" name="price" value="{{ item.price }}" required>
+
+            <label>Nutrition (JSON)</label>
+            <textarea name="nutrition" rows="6">{{ nutrition_text }}</textarea>
+
+            <label>Description</label>
+            <textarea name="description" rows="3">{{ item.description }}</textarea>
 
             <label><input type="checkbox" name="is_healthy" {% if item.is_healthy %}checked{% endif %}> Healthy</label>
 
             <button type="submit">Update</button>
         </form>
-        <div class="link"><a href="{{ url_for('index') }}">&larr; Back to all items</a></div>
     </div>
 </body>
 </html>
