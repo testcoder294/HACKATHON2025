@@ -115,7 +115,9 @@
         <div class="food-item">
             <a href="{{ url_for('food_detail', food_id=item.id) }}">
                 <img src="{{ url_for('static', filename='images/' + item.image) }}" alt="{{ item.name }}">
-                <div>{{ item.name }}</div>
+                <div style="font-size:1.15em; font-weight:700; margin-bottom:4px;">{{ item.name }}</div>
+                <div style="font-size:1.05em; color:#00bfae; margin-bottom:4px;">₹{{ '%.2f'|format(item.price) }}</div>
+                <span style="display:inline-block; padding:2px 10px; border-radius:12px; font-size:0.95em; font-weight:600; background:{{ '#b2ffb2' if item.is_healthy else '#ffd6d6' }}; color:{{ '#008c5f' if item.is_healthy else '#b85c00' }}; margin-bottom:6px;">{{ 'Healthy' if item.is_healthy else 'Junk' }}</span>
             </a>
         </div>
         {% endfor %}

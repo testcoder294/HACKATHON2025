@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Your Dashboard</title>
+    <style>
+        body { font-family: 'Poppins', Arial, sans-serif; background: #e0f7fa; }
+        .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 18px; box-shadow: 0 4px 24px #00bfae22; padding: 36px; }
+        h2 { color: #00bfae; text-align: center; }
+        .summary { display: flex; justify-content: space-around; margin-bottom: 30px; }
+        .summary div { background: #e0f7fa; border-radius: 12px; padding: 18px 28px; font-size: 1.1em; font-weight: 600; color: #00bfae; box-shadow: 0 2px 8px #00bfae11; }
+        table { width: 100%; border-collapse: collapse; margin-top: 18px; }
+        th, td { padding: 10px 14px; border-bottom: 1px solid #b2dfdb; }
+        th { background: #e0f7fa; color: #00bfae; font-weight: 700; }
+        td { color: #ff9800; font-weight: 600; }
+        .healthy { color: #008c5f; }
+        .junk { color: #b85c00; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Your Food Log &amp; Nutrition Summary</h2>
+        <div class="summary">
+            <div>Total Calories: {{ total_calories }}</div>
+            <div>Healthy: {{ healthy_count }}</div>
+            <div>Junk: {{ junk_count }}</div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Food</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for log in logs %}
+                <tr>
+                    <td>{{ log.date }}</td>
+                    <td>{{ log.food.name }}</td>
+                    <td class="{{ 'healthy' if log.is_healthy else 'junk' }}">{{ 'Healthy' if log.is_healthy else 'Junk' }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

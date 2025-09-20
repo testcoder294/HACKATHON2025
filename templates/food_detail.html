@@ -109,6 +109,8 @@
     <div class="container">
         <h2>{{ item.name }}</h2>
         <img src="{{ url_for('static', filename='images/' + item.image) }}" alt="{{ item.name }}">
+        <div style="font-size:1.15em; color:#00bfae; font-weight:600; margin-bottom:8px;">₹{{ '%.2f'|format(item.price) }}</div>
+    <span style="display:inline-block; padding:3px 14px; border-radius:14px; font-size:1em; font-weight:700; background:{{ '#b2ffb2' if item.is_healthy else '#ffd6d6' }}; color:{{ '#008c5f' if item.is_healthy else '#b85c00' }}; margin-bottom:16px;">{{ 'Healthy' if item.is_healthy else 'Junk' }}</span>
         <h3>Nutritional Information</h3>
         <table>
             <tbody>
@@ -120,7 +122,12 @@
             {% endfor %}
             </tbody>
         </table>
-        <a href="{{ url_for('index') }}">&larr; Back to all items</a>
+        {% if current_user.is_authenticated %}
+        <form method="POST" action="{{ url_for('log_food', food_id=item.id) }}" style="margin-top:24px; text-align:center;">
+            <button type="submit" style="background:#00bfae; color:#fff; border:none; border-radius:8px; padding:10px 24px; font-size:1.1em; font-weight:bold; cursor:pointer; transition:background 0.2s;">Log as Consumed</button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('index') }}" style="margin-top:18px;">&larr; Back to all items</a>
     </div>
     <footer>
     &copy; {{ 2025 }} Canteen Food Explorer &mdash; Designed with ❤️ by Team Binary Bruteforce

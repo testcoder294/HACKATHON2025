@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <style>
+        body { font-family: 'Poppins', Arial, sans-serif; background: #e0f7fa; }
+        .container { max-width: 400px; margin: 60px auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 24px #00bfae22; padding: 32px; }
+        h2 { color: #00bfae; text-align: center; }
+        form { display: flex; flex-direction: column; gap: 18px; }
+        input { padding: 10px; border-radius: 6px; border: 1px solid #b2dfdb; font-size: 1em; }
+        button { background: #00bfae; color: #fff; border: none; border-radius: 6px; padding: 12px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background: #ff9800; }
+        .link { text-align: center; margin-top: 12px; }
+        .link a { color: #00bfae; text-decoration: none; }
+        .link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form method="POST">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <div class="link">Don't have an account? <a href="{{ url_for('register') }}">Register</a></div>
+    </div>
+</body>
+</html>
